@@ -25,6 +25,8 @@ class ZTimeSerie: public ZControl {
         void addRow(unsigned long time, float value);
         void setFixedTime(unsigned long start, unsigned long end);
         void setDecimalPlaces(int dp);
+        void setTitle(String t);
+        void setSubtitle(String st);
         String fmtTime(unsigned long time);
 };
 
@@ -77,14 +79,6 @@ void ZTimeSerie::draw() {
 
     app->tft->drawRect(zx(), zy(), zw(), zh() - 20, theme.darkBackground);  
 
-    if (!rows->length()) {
-        Serial.println("No rows");
-        app->unuseFont(font);
-        ZControl::draw();
-        return;
-    }
-    Serial.print("Si hay rows:"); Serial.println(rows->length());
-
     float v0 = min, v1 = max;
     if (v0 == v1) {
         v0 -= 1.0; v1 += 1.0;
@@ -92,12 +86,15 @@ void ZTimeSerie::draw() {
     int y1 = zy() + zh() - 20 - 10;
     int x0 = zx(), x1 = zx() + zw();
     int _x, _y, x, y;
-    for (int i=0; i<rows->length(); i++) {
-        TimeSeriaData *row = ((TimeSeriaData *)rows->get(i));
-        x = x0 + (int)(zw() * (row->time - t0) / (t1 - t0));
-        y = y1 - (int)((zh() - 20 - 10) * (row->value - min) / (max - min));
-        if (i > 0) app->tft->drawLine(_x, _y, x, y, theme.primaryBackground);
-        _x = x; _y = y;
+
+    if (rows->length()) {
+        for (int i=0; i<rows->length(); i++) {
+            TimeSeriaData *row = ((TimeSeriaData *)rows->get(i));
+            x = x0 + (int)(zw() * (row->time - t0) / (t1 - t0));
+            y = y1 - (int)((zh() - 20 - 20) * (row->value - min) / (max - min));
+            if (i > 0) app->tft->drawLine(_x, _y, x, y, theme.primaryBackground);
+            _x = x; _y = y;
+        }
     }
     app->tft->setTextDatum(MR_DATUM);
     app->tft->drawLine(zx() + zw() - 5, zy() + 10, zx() + zw(), zy() + 10, theme.primaryBackground);
@@ -135,6 +132,7 @@ void ZTimeSerie::draw() {
 void ZTimeSerie::clearRows() {
     if (rows) delete rows;
     rows = new ZLinkedList();
+    invalidate();
 }
 
 void ZTimeSerie::addRow(unsigned long time, float value) {
@@ -159,10 +157,20 @@ void ZTimeSerie::setDecimalPlaces(int dp) {
     invalidate();
 }
 
-String months[] = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dec"};
+void ZTimeSerie::setTitle(String t) {
+    title = t;
+    invalidate();
+}
+
+void ZTimeSerie::setSubtitle(String st) {
+    subtitle = st;
+    invalidate();
+}
+
+String zts_months[] = {"jan", "feb", "mar", "apr", "may", "jun", "jul", "ago", "sep", "oct", "nov", "dec"};
 String ZTimeSerie::fmtTime(unsigned long time) {
     DateTime d(time);
-    return months[d.month() - 1] + "-" + (d.day() < 10?"0":"") + (String)d.day() + " "
+    return zts_months[d.month() - 1] + "-" + (d.day() < 10?"0":"") + (String)d.day() + " "
          + (d.hour() < 10?"0":"") + (String)d.hour() + ":" + (d.minute() < 10?"0":"") + (String)d.minute();
 }
 
