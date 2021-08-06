@@ -2,6 +2,7 @@
 #define ZScreens_h
 
 #include <TFT_eSPI.h>
+#define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
 #include "lib/ZTypes.h"
 #include "lib/ZLinkedList.h"

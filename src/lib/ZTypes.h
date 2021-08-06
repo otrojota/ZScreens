@@ -1,6 +1,7 @@
 #ifndef ZTypes_h
 #define ZTypes_h
 
+#define ARDUINOJSON_USE_LONG_LONG 1
 #include <ArduinoJson.h>
 
 class ZControl;
